@@ -56,17 +56,22 @@ jobs:
       - name: Match THL contracts
         run: python scripts/match_contracts.py
 
+      - name: Apply reviewed overrides
+        run: python scripts/apply_contract_overrides.py
+
       - name: Show match summary
         run: cat reports/match_summary.json
 
       - name: Upload contract results
         uses: actions/upload-artifact@v4
         with:
-          name: thl-contract-results-v2
+          name: thl-contract-results-v3
           path: |
             data/output/thl_contracts.csv
             data/input/nhlscraper_contracts.csv
             data/input/nhlscraper_players.csv
+            data/manual-overrides/name_aliases.csv
+            data/manual-overrides/contract_overrides.csv
             reports/match_summary.json
             reports/unmatched_players.csv
             reports/ambiguous_matches.csv
