@@ -2,13 +2,17 @@
   "thl_season": "2026-2027",
   "reference_nhl_season": "2025-2026",
   "next_nhl_season": "2026-2027",
+  "roster_age_year": 2026,
+  "age_tolerance": 2,
   "league_minimum": 775000,
   "max_contract_years": 8,
-  "name_match_threshold": 0.94,
+  "name_match_threshold": 0.88,
   "input": {
     "skaters_csv": "data/input/STHSPlayerRoster.csv",
     "goalies_csv": "data/input/STHSGoaliesRoster.csv",
-    "contracts_csv": "data/input/nhlscraper_contracts.csv"
+    "contracts_csv": "data/input/nhlscraper_contracts.csv",
+    "players_csv": "data/input/nhlscraper_players.csv",
+    "aliases_csv": "data/manual-overrides/name_aliases.csv"
   },
   "output": {
     "matched_contracts_csv": "data/output/thl_contracts.csv",
