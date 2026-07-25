@@ -1,0 +1,65 @@
+name: Materialize roster CSV files
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "staging/**"
+      - ".github/workflows/materialize-rosters.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: ${{ !contains(github.event.head_commit.message || '', '[skip roster materialization]') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Rebuild roster files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/input
+
+          cat staging/goalies.csv.gz.b64.part* | base64 --decode > /tmp/goalies.csv.gz
+          gzip --decompress --stdout /tmp/goalies.csv.gz > data/input/STHSGoaliesRoster.csv
+
+          cat staging/skaters.csv.gz.b64.part* | base64 --decode > /tmp/skaters.csv.gz
+          gzip --decompress --stdout /tmp/skaters.csv.gz > data/input/STHSPlayerRoster.csv
+
+          printf '%s  %s\n' \
+            'eec389a41c40c350742d64e13af6313b9927ed802e9037cbe1a9eb8c87b4d9a6' \
+            'data/input/STHSGoaliesRoster.csv' | sha256sum --check --strict
+
+          printf '%s  %s\n' \
+            '4ab1b85bab0c319c71376db7dca3fb2fc8a7fcbc1566f0e8e04b6b3b6adadb0d' \
+            'data/input/STHSPlayerRoster.csv' | sha256sum --check --strict
+
+          test "$(wc -l < data/input/STHSGoaliesRoster.csv)" -eq 197
+          test "$(wc -l < data/input/STHSPlayerRoster.csv)" -eq 1740
+
+          rm -f staging/goalies.csv.gz.b64.part* staging/skaters.csv.gz.b64.part*
+
+      - name: Commit roster files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f data/input/STHSGoaliesRoster.csv data/input/STHSPlayerRoster.csv
+          git add -u staging
+
+          if git diff --cached --quiet; then
+            echo "No roster changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Add THL skater and goalie rosters [skip roster materialization]"
+          git push
