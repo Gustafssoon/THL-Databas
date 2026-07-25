@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# Local input and generated output
+/data/input/*
+!/data/input/.gitkeep
+/data/output/*
+!/data/output/.gitkeep
+/reports/*
+!/reports/.gitkeep
+
+# Secrets and local settings
+.env
+*.secret
+credentials.json
+service-account.json
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
