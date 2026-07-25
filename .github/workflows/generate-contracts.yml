@@ -7,9 +7,9 @@ on:
     paths:
       - ".github/workflows/generate-contracts.yml"
       - "config/config.json"
+      - "pytest.ini"
       - "requirements.txt"
-      - "scripts/export_nhlscraper_contracts.R"
-      - "scripts/match_contracts.py"
+      - "scripts/**"
       - "tests/**"
       - "data/input/STHSPlayerRoster.csv"
       - "data/input/STHSGoaliesRoster.csv"
