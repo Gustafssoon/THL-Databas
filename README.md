@@ -19,13 +19,36 @@ Projektets första mål är att matcha THL:s spelarlista mot historiska NHL-kont
 
 ```text
 config/                  Inställningar för säsong och kolumnnamn
-data/input/              Lokala indatafiler, ej versionshanterade
+data/input/              Materialiserade spelar- och kontraktsfiler
 data/manual-overrides/   Manuella rättelser
-data/output/             Genererade exporter, ej versionshanterade
+data/output/             Genererade exporter
 reports/                 Matchnings- och kvalitetsrapporter
 scripts/                 Import, matchning och export
+staging/                 Verifierade importdelar för rosterfilerna
 tests/                   Automatiska tester
 ```
+
+## Inlagda rosterfiler
+
+Följande uppladdningar finns i repot som komprimerade och Base64-kodade staging-delar:
+
+- `STHSPlayerRoster (3)(1).CSV` – 1 739 utespelare plus rubrikrad
+- `STHSGoaliesRoster (3)(2).CSV` – 196 målvakter plus rubrikrad
+
+Återskapa de exakta CSV-filerna med:
+
+```bash
+python scripts/materialize_rosters.py
+```
+
+Det skapar:
+
+```text
+data/input/STHSPlayerRoster.csv
+data/input/STHSGoaliesRoster.csv
+```
+
+Skriptet verifierar både radantal och SHA-256 innan filerna skrivs. Det finns även ett manuellt körbart GitHub Actions-flöde under **Actions → Materialize roster CSV files**.
 
 ## Referenssäsong
 
@@ -38,7 +61,12 @@ Det innebär att exporten visar:
 
 ## Arbetsflöde
 
-1. Lägg THL:s spelar- och målvaktsfiler i `data/input/` med filnamnen som anges i konfigurationen.
+1. Materialisera rosterfilerna:
+
+```bash
+python scripts/materialize_rosters.py
+```
+
 2. Exportera kontraktsdatan från `nhlscraper`:
 
 ```bash
@@ -56,4 +84,4 @@ python scripts/match_contracts.py
 
 ## Status
 
-Grundstruktur och första matchningspipeline är skapade. Matchningsresultatet är ännu inte importerat till THL Spelardatabas.
+De aktuella spelar- och målvaktslistorna är inlagda som verifierade importpaket. Grundstruktur och första matchningspipeline är skapade. Matchningsresultatet är ännu inte importerat till THL Spelardatabas.
