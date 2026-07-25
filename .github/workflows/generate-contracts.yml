@@ -11,6 +11,7 @@ on:
       - "requirements.txt"
       - "scripts/**"
       - "tests/**"
+      - "data/manual-overrides/**"
       - "data/input/STHSPlayerRoster.csv"
       - "data/input/STHSGoaliesRoster.csv"
 
@@ -47,9 +48,9 @@ jobs:
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           packages: any::nhlscraper
-          cache-version: 1
+          cache-version: 2
 
-      - name: Export nhlscraper contracts
+      - name: Export raw nhlscraper data
         run: Rscript scripts/export_nhlscraper_contracts.R
 
       - name: Match THL contracts
@@ -61,9 +62,11 @@ jobs:
       - name: Upload contract results
         uses: actions/upload-artifact@v4
         with:
-          name: thl-contract-results
+          name: thl-contract-results-v2
           path: |
             data/output/thl_contracts.csv
+            data/input/nhlscraper_contracts.csv
+            data/input/nhlscraper_players.csv
             reports/match_summary.json
             reports/unmatched_players.csv
             reports/ambiguous_matches.csv
