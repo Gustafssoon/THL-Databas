@@ -14,7 +14,7 @@ from pathlib import Path
 @dataclass(frozen=True)
 class RosterArtifact:
     name: str
-    chunk_pattern: str
+    chunk_names: tuple[str, ...]
     output_path: Path
     sha256: str
     expected_lines: int
@@ -23,14 +23,26 @@ class RosterArtifact:
 ARTIFACTS = (
     RosterArtifact(
         name="goalies",
-        chunk_pattern="goalies.csv.gz.b64.part*",
+        chunk_names=("goalies.csv.gz.b64.part01",),
         output_path=Path("data/input/STHSGoaliesRoster.csv"),
         sha256="eec389a41c40c350742d64e13af6313b9927ed802e9037cbe1a9eb8c87b4d9a6",
         expected_lines=197,
     ),
     RosterArtifact(
         name="skaters",
-        chunk_pattern="skaters.csv.gz.b64.part*",
+        chunk_names=(
+            "skaters.csv.gz.b64.part01",
+            "skaters.csv.gz.b64.part02",
+            "skaters.csv.gz.b64.part03",
+            "skaters.csv.gz.b64.fixed04a",
+            "skaters.csv.gz.b64.fixed04b",
+            "skaters.csv.gz.b64.fixed04c",
+            "skaters.csv.gz.b64.fixed04d",
+            "skaters.csv.gz.b64.part05",
+            "skaters.csv.gz.b64.part06",
+            "skaters.csv.gz.b64.part07",
+            "skaters.csv.gz.b64.part08",
+        ),
         output_path=Path("data/input/STHSPlayerRoster.csv"),
         sha256="4ab1b85bab0c319c71376db7dca3fb2fc8a7fcbc1566f0e8e04b6b3b6adadb0d",
         expected_lines=1740,
@@ -39,15 +51,14 @@ ARTIFACTS = (
 
 
 def materialize(artifact: RosterArtifact, staging_dir: Path) -> None:
-    chunks = sorted(staging_dir.glob(artifact.chunk_pattern))
-    if not chunks:
+    chunks = [staging_dir / name for name in artifact.chunk_names]
+    missing = [path for path in chunks if not path.is_file()]
+    if missing:
         if artifact.output_path.exists():
             print(f"{artifact.name}: CSV-filen finns redan: {artifact.output_path}")
             return
-        raise FileNotFoundError(
-            f"Hittade inga staging-delar för {artifact.name}: "
-            f"{staging_dir / artifact.chunk_pattern}"
-        )
+        missing_text = ", ".join(str(path) for path in missing)
+        raise FileNotFoundError(f"Saknade staging-delar för {artifact.name}: {missing_text}")
 
     encoded = "".join(chunk.read_text(encoding="ascii").strip() for chunk in chunks)
     compressed = base64.b64decode(encoded, validate=True)
