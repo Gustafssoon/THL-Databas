@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -42,8 +42,22 @@ jobs:
             '4ab1b85bab0c319c71376db7dca3fb2fc8a7fcbc1566f0e8e04b6b3b6adadb0d' \
             'data/input/STHSPlayerRoster.csv' | sha256sum --check --strict
 
-          test "$(wc -l < data/input/STHSGoaliesRoster.csv)" -eq 197
-          test "$(wc -l < data/input/STHSPlayerRoster.csv)" -eq 1740
+          python - <<'PY'
+          import csv
+          from pathlib import Path
+
+          expected_rows = {
+              Path('data/input/STHSGoaliesRoster.csv'): 197,
+              Path('data/input/STHSPlayerRoster.csv'): 1740,
+          }
+
+          for path, expected in expected_rows.items():
+              with path.open('r', encoding='utf-8-sig', newline='') as handle:
+                  actual = sum(1 for _ in csv.reader(handle))
+              print(f'{path}: {actual} CSV-rader')
+              if actual != expected:
+                  raise SystemExit(f'{path} hade {actual} rader, förväntade {expected}')
+          PY
 
           rm -f staging/goalies.csv.gz.b64.part* staging/skaters.csv.gz.b64.part*
 
