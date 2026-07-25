@@ -33,7 +33,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          rm -f staging/goalies.csv.gz.b64.part* staging/skaters.csv.gz.b64.part*
+          rm -f staging/goalies.csv.gz.b64.part* staging/skaters.csv.gz.b64.*
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
